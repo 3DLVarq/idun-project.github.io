@@ -1,0 +1,38 @@
+pkgname=sdl3_mixer
+pkgver=3.3.0
+pkgrel=0
+pkgdesc="Simple DirectMedia Layer 3 - Audio Mixer Library"
+url="https://github.com"
+arch="aarch64"
+license="Zlib"
+depends="sdl3"
+makedepends="cmake build-base sdl3-dev libvorbis-dev"
+subpackages="$pkgname-dev"
+
+source="$pkgname-$pkgver.tar.gz::https://github.com/libsdl-org/SDL_mixer/archive/refs/tags/release-$pkgver.tar.gz"
+
+builddir="$srcdir/SDL_mixer-release-$pkgver"
+options="!check"
+
+build() {
+	mkdir -p "$builddir/build"
+	cd "$builddir/build"
+
+	cmake -DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_C_FLAGS="-O3 -mcpu=cortex-a53" \
+		-DSDLMIXER_VLD=OFF \
+		-DSDLMIXER_OPUS=OFF \
+		-DSDLMIXER_FLAC=OFF \
+		-DSDLMIXER_MP3=OFF \
+		-DSDLMIXER_MIDI=OFF \
+		-DSDLMIXER_VORBIS=VORBISFILE \
+		../
+
+	make -j4
+}
+
+package() {
+	cd "$builddir/build"
+	make DESTDIR="$pkgdir" install
+}
