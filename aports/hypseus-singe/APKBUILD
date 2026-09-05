@@ -1,0 +1,52 @@
+# Contributor: Leo V <leo-v.email@proton.me>
+pkgname=hypseus-singe
+pkgver=3.0.1
+pkgrel=1
+pkgdesc="Arcade Laserdisc Emulator SDL3 version of Daphne and Singe"
+url="https://github.com/DirtBagXon/hypseus-singe"
+arch="aarch64"
+license="GPL-3.0-or-later"
+depends="sdl3 sdl3_ttf sdl3_mixer sdl3_image"
+makedepends="cmake build-base sdl3-dev sdl3_ttf-dev sdl3_mixer-dev sdl3_image-dev libzip-dev libvorbis-dev zlib-dev"
+subpackages="$pkgname-doc"
+source="$pkgname-$pkgver.tar.gz::https://github.com/DirtBagXon/hypseus-singe/archive/refs/tags/v$pkgver.tar.gz
+	musl-ctime.patch"
+builddir="$srcdir/$pkgname-$pkgver"
+options="!check"
+
+prepare() {
+	default_prepare
+}
+
+build() {
+    mkdir -p "$builddir/build"
+	cd "$builddir/build"
+
+	cmake -DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_PREFIX_PATH="/usr/local" \
+		-DCMAKE_C_FLAGS="-O3 -mcpu=cortex-a53" \
+		-DCMAKE_CXX_FLAGS="-O3 -mcpu=cortex-a53" \
+		../src
+
+	make -j4
+}
+
+package() {
+	cd "$builddir/build"
+	
+	mkdir -p "$pkgdir"/usr/bin
+	mkdir -p "$pkgdir"/usr/share/hypseus-singe
+	
+	install -m755 hypseus "$pkgdir"/usr/bin/hypseus-singe
+
+    cp -r "$builddir/pics" "$pkgdir"/usr/share/hypseus-singe/
+    cp -r "$builddir/fonts" "$pkgdir"/usr/share/hypseus-singe/
+    cp -r "$builddir/ram" "$pkgdir"/usr/share/hypseus-singe/
+    cp -r "$builddir/roms" "$pkgdir"/usr/share/hypseus-singe/
+    cp -r "$builddir/midi" "$pkgdir"/usr/share/hypseus-singe/
+    cp -r "$builddir/sound" "$pkgdir"/usr/share/hypseus-singe/
+    cp -r "$builddir/vldp" "$pkgdir"/usr/share/hypseus-singe/
+    cp -r "$builddir/singe" "$pkgdir"/usr/share/hypseus-singe/
+}
+
